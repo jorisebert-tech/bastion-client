@@ -1,0 +1,44 @@
+name: Create Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v2.0.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  create-draft-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format. Expected vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+      - name: Generate Checksums
+        run: bash ./generate_checksums.sh
+
+      - name: Publish Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            client/**
+            runtimes/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
