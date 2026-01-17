@@ -7,10 +7,6 @@ on:
         description: 'Release version (e.g., v2.0.0)'
         required: true
         default: 'v0.1.0'
-
-permissions:
-  contents: write
-  releases: write
   
 jobs:
   create-draft-release:
